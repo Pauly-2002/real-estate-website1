@@ -6,7 +6,7 @@ const Home = () => {
     <div className="relative h-[100vh]">
       <img
         src={homeImage}
-        className="w-full object-cover h-full"
+        className="w-full h- object-cover h-full"
         alt="homeImage"
       ></img>
 

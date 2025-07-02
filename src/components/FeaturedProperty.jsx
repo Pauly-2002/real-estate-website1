@@ -1,7 +1,8 @@
-import React from 'react'
-import properties from '../property.jsx';
+import React from "react";
+import properties from "../property.jsx";
+import { FaRuler, FaBed, FaBath, FaHeart } from "react-icons/fa";
 
-const FeaturedProperty = () => {
+const FeaturedProperty = ({ setSelectedProperty }) => {
   return (
     <section className="max-w-7xl mx-auto py-16 px-4">
       <h2 className="text-3xl font-bold mb-8">Featured Properties</h2>
@@ -11,6 +12,7 @@ const FeaturedProperty = () => {
           return (
             <div
               key={property.id}
+              onClick={() => setSelectedProperty(property)}
               className="bg-white rounded-2xl drop-shadow-lg overflow-hidden hover:drop-shadow-xl hover:scale-105 transition-all duration-300 relative group cursor-pointer"
             >
               <div className="relative">
@@ -19,11 +21,11 @@ const FeaturedProperty = () => {
                   className="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <button
-                  className="absolute top-4 right-4 p-2 rounded-ful
+                  className="absolute top-4 right-4 p-2 rounded-full
                bg-white/70 hover:bg-white 
                transition-colors duration-200"
                 >
-                  Shop
+                  <FaHeart />
                 </button>
               </div>
 
@@ -39,23 +41,25 @@ const FeaturedProperty = () => {
                   {property.title}
                 </h1>
 
-                <div className="flex justify-between items-center p-3 big-blue-50 rounded-lg">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                   <div className="flex items-center gap-2">
+                    <FaBed className="text-blue-600" />
                     <span className="text-gray-600">{property.beds}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <FaBath className="text-blue-600" />
                     <span className="text-gray-600">{property.baths}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <FaRuler className="text-blue-600" />
                     <span className="text-gray-600">{property.sqft}</span>
                   </div>
                 </div>
               </div>
             </div>
           );
-          
         })}
       </div>
     </section>
