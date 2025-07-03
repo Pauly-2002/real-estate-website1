@@ -1,9 +1,9 @@
 import './index.css';
-import Home from "../src/components/Home";
-import FeaturedProperty from "../src/components/FeaturedProperty";
-import PropertyModel from "../src/components/PropertyModel";
-import Contact from "../src/components/Contact";
-import Footer from "../src/components/Footer";
+import Home from "./components/Home";
+import FeaturedProperty from "./components/FeaturedProperty";
+import PropertyModel from "./components/PropertyModel";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
 import { useState } from 'react';
 
 function App() {
