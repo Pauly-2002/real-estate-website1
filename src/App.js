@@ -2,7 +2,7 @@ import "./index.css";
 import Home from "./components/Home";
 import FeaturedProperty from "./components/FeaturedProperty";
 import PropertyModel from "./components/PropertyModel";
-import Contact from "./components/Contact";
+import Contact from "./components/ContactComponent";
 import Footer from "./components/Footer";
 import { useState } from "react";
 
