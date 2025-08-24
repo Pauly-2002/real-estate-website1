@@ -2,14 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar{
+::-webkit-scrollbar {
   width: 20px;
 }
 
-::-webkit-scrollbar-thumb{
+::-webkit-scrollbar-thumb {
   background-color: rgb(38, 100, 235);
 }
 
-webkit::-webkit-scrollbar-track{
+::-webkit-scrollbar-track {
   background-color: rgb(243, 244, 246);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(38, 100, 235);
+  display:none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

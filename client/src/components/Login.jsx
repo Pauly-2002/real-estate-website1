@@ -17,8 +17,12 @@ const Login = () => {
     });
 
     if (res.ok) {
-      navigate("/admin-page");
-    }else{
+      const data = await res.json();
+      if (data.isAdmin) {
+        localStorage.setItem("isAdmin", "true"); // ✅ SET THIS
+        navigate("/admin-page");
+      }
+    } else {
       alert("Invalid credentials");
     }
   };
