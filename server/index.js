@@ -5,28 +5,31 @@ import dotenv from "dotenv";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import path from "path";
+import { fileURLToPath } from "url";
+
+dotenv.config();
 
 const app = express();
-app.use(cors());
-dotenv.config();
 app.use(express.json());
 
+// PostgreSQL connection
 const pool = new Pool({
-  user: "projects",
-  host: "localhost",
-  database: "real_estate",
-  password: "Pauly200210@",
-  port: "5432",
+  user: process.env.DB_USER || "projects",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "real_estate",
+  password: process.env.DB_PASSWORD || "Pauly200210@",
+  port: process.env.DB_PORT || 5432,
 });
 
+// Cloudinary config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD,
   api_key: process.env.CLOUDINARY_KEY,
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-// Cloudinary Storage
-
+// Multer + Cloudinary storage
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -43,27 +46,27 @@ const storage = new CloudinaryStorage({
     ],
   },
 });
-
 const upload = multer({ storage });
-// Login to the Admin Page
 
+/* ===================
+      API ROUTES
+=================== */
+
+// Login
 app.post("/api/admin/login", (req, res) => {
   const { email, password } = req.body;
-  
 
   if (
     email?.trim().toLowerCase() === "realestate@gmail.com" &&
     password === "Pauly200210@"
   ) {
-    res.status(200).json({isAdmin:true});
-
+    res.status(200).json({ isAdmin: true });
   } else {
     res.sendStatus(401);
   }
 });
 
 // Create Listings
-
 app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
   const {
     title,
@@ -77,17 +80,16 @@ app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
     types,
   } = req.body;
 
-  // Convert price to float
   const numericPrice = parseFloat(price);
   if (isNaN(numericPrice)) {
     return res.status(400).json({ error: "Price must be a valid number" });
   }
 
   try {
-    const imageUrls = req.files.map((file) => {
-      const baseUrl = file.path;
-      return baseUrl.replace("/upload/", "/upload/f_auto,q_auto,w_800/");
-    });
+    const imageUrls = req.files.map((file) =>
+      file.path.replace("/upload/", "/upload/f_auto,q_auto,w_800/")
+    );
+
     await pool.query(
       "INSERT INTO listings(title, description, price, image_urls, agent_contact, location, beds, sqft, baths, property_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )",
       [
@@ -103,6 +105,7 @@ app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
         types,
       ]
     );
+
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -111,7 +114,6 @@ app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
 });
 
 // Get Listings
-
 app.get("/api/displaylistings", async (req, res) => {
   try {
     const results = await pool.query("SELECT * FROM listings");
@@ -123,11 +125,9 @@ app.get("/api/displaylistings", async (req, res) => {
 });
 
 // Delete Listings
-
 app.delete("/api/deletelistings/:id", async (req, res) => {
-  const id = req.params.id;
   try {
-    await pool.query("DELETE FROM listings WHERE id=$1", [id]);
+    await pool.query("DELETE FROM listings WHERE id=$1", [req.params.id]);
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -135,8 +135,7 @@ app.delete("/api/deletelistings/:id", async (req, res) => {
   }
 });
 
-// Editing Listings
-
+// Update Listings
 app.put("/api/updatelistings/:id", async (req, res) => {
   const {
     title,
@@ -148,18 +147,6 @@ app.put("/api/updatelistings/:id", async (req, res) => {
     location,
     agent_contact,
   } = req.body;
-  const { id } = req.params;
-  console.log(
-    title,
-    description,
-    price,
-    beds,
-    baths,
-    sqft,
-    location,
-    agent_contact
-  );
-
   try {
     await pool.query(
       "UPDATE listings SET title=$1, description=$2, price=$3, beds=$4, baths=$5, sqft=$6, location=$7, agent_contact=$8 WHERE id=$9",
@@ -172,7 +159,7 @@ app.put("/api/updatelistings/:id", async (req, res) => {
         sqft,
         location,
         agent_contact,
-        id,
+        req.params.id,
       ]
     );
     res.sendStatus(200);
@@ -182,8 +169,7 @@ app.put("/api/updatelistings/:id", async (req, res) => {
   }
 });
 
-// Search Queries
-
+// Search Properties
 app.get("/properties", async (req, res) => {
   const { location, type } = req.query;
   let query = "SELECT * FROM listings WHERE 1=1";
@@ -201,14 +187,30 @@ app.get("/properties", async (req, res) => {
 
   try {
     const result = await pool.query(query, params);
-    console.log("Query:", query, "Params:", params); // ✅ Debug
-    res.json(result.rows); // ✅ Correct response
+    res.json(result.rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-app.listen(5000, () => {
-  console.log("listening on port 5000");
+/* ===================
+   SERVE REACT BUILD
+=================== */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
+
+/* ===================
+   START SERVER
+=================== */
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
 });
