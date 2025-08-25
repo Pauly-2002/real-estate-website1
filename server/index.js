@@ -2,6 +2,7 @@ import express from "express";
 import Pool from "./db.js";
 import dotenv from "dotenv";
 import multer from "multer";
+import pkg from "pg";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import path from "path";
@@ -11,6 +12,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+const { Pool } = pkg;
 
 // PostgreSQL connection
 const pool = new Pool({
