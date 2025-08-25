@@ -206,6 +206,18 @@ app.get("/:path(*)", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
 
+// Test database connection
+app.get("/test-db", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ success: true, time: result.rows[0].now });
+  } catch (err) {
+    console.error("Database connection error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
 /* ===================
    START SERVER
 =================== */
