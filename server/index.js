@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { Pool } from "pg";
+import pool from "./db.js";
 import dotenv from "dotenv";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
@@ -14,11 +14,12 @@ const app = express();
 app.use(express.json());
 
 // PostgreSQL connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // required for Render
-  },
+const pool = new pool({
+  user: process.env.DB_USER || "projects",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "real_estate",
+  password: process.env.DB_PASSWORD || "Pauly200210@",
+  port: process.env.DB_PORT || 5432,
 });
 
 // Cloudinary config
