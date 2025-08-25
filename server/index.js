@@ -1,5 +1,4 @@
 import express from "express";
-import Pool from "./db.js";
 import dotenv from "dotenv";
 import multer from "multer";
 import pkg from "pg";
