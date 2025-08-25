@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 const { Pool } = pkg;
-app.use("/api", router);
+
 
 // PostgreSQL connection
 const pool = new Pool({
