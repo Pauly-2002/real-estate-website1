@@ -1,18 +1,16 @@
-
 // db.js
 import pkg from "pg";
 const { Pool } = pkg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // ✅ Render gives this
+  user: process.env.DB_USER || "projects",
+  host: process.env.DB_HOST || "localhost",
+  database: process.env.DB_NAME || "real_estate",
+  password: process.env.DB_PASSWORD || "Pauly200210@",
+  port: process.env.DB_PORT || 5432,
   ssl: {
-    rejectUnauthorized: false, // ✅ required on Render
+    rejectUnauthorized: false, // important for Render/Postgres
   },
 });
-
-// test connection on startup
-pool.connect()
-  .then(() => console.log("✅ Connected to PostgreSQL"))
-  .catch(err => console.error("❌ Database connection error:", err));
 
 export default pool;

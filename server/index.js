@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import pool from "./db.js";
+import pool from "./db.js"; // ✅ import pool directly
 import dotenv from "dotenv";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
@@ -11,16 +11,8 @@ import { fileURLToPath } from "url";
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
-
-// PostgreSQL connection
-const pool = new pool({
-  user: process.env.DB_USER || "projects",
-  host: process.env.DB_HOST || "localhost",
-  database: process.env.DB_NAME || "real_estate",
-  password: process.env.DB_PASSWORD || "Pauly200210@",
-  port: process.env.DB_PORT || 5432,
-});
 
 // Cloudinary config
 cloudinary.config({
@@ -91,7 +83,7 @@ app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
     );
 
     await pool.query(
-      "INSERT INTO listings(title, description, price, image_urls, agent_contact, location, beds, sqft, baths, property_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )",
+      "INSERT INTO listings(title, description, price, image_urls, agent_contact, location, beds, sqft, baths, property_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
       [
         title,
         description,
@@ -108,7 +100,7 @@ app.post("/api/admin/listings", upload.array("images", 5), async (req, res) => {
 
     res.sendStatus(200);
   } catch (err) {
-    console.error(err);
+    console.error("Error inserting listing:", err);
     res.sendStatus(500);
   }
 });
@@ -119,7 +111,7 @@ app.get("/api/displaylistings", async (req, res) => {
     const results = await pool.query("SELECT * FROM listings");
     res.json(results.rows);
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching listings:", err);
     res.status(500).json({ error: "database error" });
   }
 });
@@ -130,7 +122,7 @@ app.delete("/api/deletelistings/:id", async (req, res) => {
     await pool.query("DELETE FROM listings WHERE id=$1", [req.params.id]);
     res.sendStatus(200);
   } catch (err) {
-    console.error(err);
+    console.error("Error deleting listing:", err);
     res.sendStatus(500);
   }
 });
@@ -164,7 +156,7 @@ app.put("/api/updatelistings/:id", async (req, res) => {
     );
     res.sendStatus(200);
   } catch (err) {
-    console.error(err);
+    console.error("Error updating listing:", err);
     res.sendStatus(500);
   }
 });
@@ -179,7 +171,6 @@ app.get("/properties", async (req, res) => {
     params.push(`%${location.trim()}%`);
     query += ` AND TRIM(location) ILIKE $${params.length}`;
   }
-
   if (type) {
     params.push(type);
     query += ` AND property_type ILIKE $${params.length}`;
@@ -189,7 +180,7 @@ app.get("/properties", async (req, res) => {
     const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
+    console.error("Error searching properties:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -200,9 +191,7 @@ app.get("/properties", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files from React build
 app.use(express.static(path.join(__dirname, "../client/build")));
-
 app.get("/:path(*)", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
