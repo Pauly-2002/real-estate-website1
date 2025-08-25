@@ -12,6 +12,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 const { Pool } = pkg;
+app.use("/api", router);
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -207,7 +208,7 @@ app.get("/:path(*)", (req, res) => {
 });
 
 // Test database connection
-app.get("/test-db", async (req, res) => {
+app.get("api/test-db", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
     res.json({ success: true, time: result.rows[0].now });
@@ -216,7 +217,6 @@ app.get("/test-db", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 
 /* ===================
    START SERVER
